@@ -1,0 +1,107 @@
+<html>
+<head>
+    <title>MNIST Example</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<!-- Latest compiled and minified JavaScript -->
+<script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <style>
+        .canvas-container {
+            width: 28px;
+            height: 28px;
+            margin: 10px 0;
+            border: 15px solid rgba(27,188,155,.3);
+            transition: border-color .2s ease-in;
+        }
+        #input-canvas {
+            background: #f5f5f5;
+            cursor: crosshair;
+        }
+        .buttons {
+            margin-top: 30px;
+        }
+    </style>
+    <script type="text/javascript">
+        var canvas, ctx;
+        var x = "black",
+            y = 3,
+            drawing = false,
+            prev = 0;
+        function init() {
+            canvas = document.getElementById('input-canvas');
+            ctx = canvas.getContext("2d");
+            w = canvas.width;
+            h = canvas.height;
+            canvas.addEventListener("mousemove", move, false);
+            canvas.addEventListener("mousedown", down, false);
+            canvas.addEventListener("mouseup", start, false);
+            canvas.addEventListener("mouseout", out, false);
+            canvas.addEventListener("touchmove", move, false);
+            canvas.addEventListener("touchstart", down, false);
+            canvas.addEventListener("touchend", start, false);
+            canvas.addEventListener("touchcancel", out, false);
+        }
+        function out(e) {
+            drawing = false
+        }
+        function start(e) {
+            drawing = false;
+        }
+        function down(e) {
+            drawing = true;
+            prev = e.changedTouches ? getPosition(e.changedTouches[0].clientX, e.changedTouches[0].clientY) : getPosition(e.clientX, e.clientY);
+        }
+        function move (e) {
+            if (drawing) {
+                var curr = e.changedTouches ? getPosition(e.changedTouches[0].clientX, e.changedTouches[0].clientY) : getPosition(e.clientX, e.clientY);
+                ctx.lineWidth = y;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(prev.x, prev.y);
+                ctx.lineTo(curr.x, curr.y);
+                ctx.stroke();
+                ctx.closePath();
+                prev = curr;
+            }
+        }
+        function getPosition(clientX, clientY) {
+            var rect = this.canvas.getBoundingClientRect();
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+        function erase() {
+            ctx.clearRect(0, 0, w, h);
+        }
+        function save() {
+            var buf = new Uint8Array(28 * 28);
+            var p = ctx.getImageData(0, 0, 28, 28);
+            for (var i = 0; i < 28; i++) {
+                for (var j = 0; j < 28; j++) {
+                    buf[i * 28 + j] = p.data[(i*28+j) * 4 + 3];
+                }
+            }
+     $.ajax({
+        url: "mppr.php",
+        type: "POST",
+        data:{
+            data: buf
+        },
+        success: function(data){
+            console.log((data))
+            alert(data)
+        }
+    })
+        }
+    </script>
+</head>
+<body onload="init()">
+<div class="canvas-container">
+    <canvas id="input-canvas" width="28" height="28"></canvas>
+    <button class="buttons" onclick="erase()">clear</button>
+    <button class="buttons" onclick="save()">recognize</button>
+</div>
+</body>
+</html>
