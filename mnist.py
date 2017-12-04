@@ -11,8 +11,6 @@ from keras.callbacks import TensorBoard
 import numpy as np
 import time
 
-tensorboard = TensorBoard(log_dir='./logs', write_graph=True)
-
 # Загружаем данные
 (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
@@ -68,6 +66,7 @@ else:
 
     # Добавляем уровни сети
     model.add(Dense(300, input_dim=784, activation="relu", kernel_initializer="normal"))
+    model.add(Dropout(0.2))
     model.add(Dense(150, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(50, activation='relu'))
@@ -81,7 +80,7 @@ else:
     print(model.summary())
 
     # Обучаем сеть
-    model.fit(X_train, Y_train, batch_size=200, epochs=10, validation_split=0.2, verbose=2, callbacks=[tensorboard])
+    model.fit(X_train, Y_train, batch_size=200, epochs=10, validation_split=0.2, verbose=2)
 
     # Оцениваем качество обучения сети на тестовых данных
     scores = model.evaluate(X_test, Y_test, verbose=0)
